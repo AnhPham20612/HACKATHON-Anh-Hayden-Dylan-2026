@@ -168,8 +168,8 @@
     
     // Logic: Hide results wrap if we are just managing references or history
     const resultsWrap = document.getElementById('results-wrap');
-    if (name === 'reference' || name === 'history') {
-        resultsWrap.style.display = 'none';
+    if (name === 'reference') {
+        resultsWrap.style.display = 'none'; // Hides the bottom section entirely
     } else {
         resultsWrap.style.display = 'block';
     }
@@ -279,22 +279,21 @@
     const level = score < 15 ? 'low' : score < 30 ? 'mid' : 'high';
     const label = score < 15 ? 'Low similarity' : score < 30 ? 'Moderate similarity' : 'High similarity';
 
-    const matches = [
-      { title: 'Smith, J. (2022) — ENGL 210 Final Paper', meta: 'Submitted Nov 2022 · English Dept', pct: Math.floor(score * 0.45), dotLevel: level },
-      { title: 'Course Reader: UOP Writing Center, Spring 2023', meta: 'Shared resource · All departments', pct: Math.floor(score * 0.30), dotLevel: 'low' },
-      { title: 'Garcia, T. (2023) — HIST 305 Term Paper', meta: 'Submitted Apr 2023 · History Dept', pct: Math.floor(score * 0.25), dotLevel: 'low' }
-    ];
+    const matches = [];
 
-    const matchRows = matches.map(m => `
-      <div class="match-item">
-        <div class="match-dot dot-${m.dotLevel}"></div>
-        <div class="match-info">
-          <p class="match-title">${m.title}</p>
-          <p class="match-meta">${m.meta}</p>
-        </div>
-        <span class="match-pct">${m.pct}%</span>
-      </div>
-    `).join('');
+    const matchRows = matches.length > 0 
+        ? matches.map(m => `
+            <div class="match-item">
+                <div class="match-dot dot-${m.dotLevel}"></div>
+                <div class="match-info">
+                    <p class="match-title">${m.title}</p>
+                    <p class="match-meta">${m.meta}</p>
+                </div>
+                <span class="match-pct">${m.pct}%</span>
+            </div>`).join('')
+        : `<p style="text-align:center; padding: 20px; color: var(--color-text-tertiary); font-size: 14px;">
+            No significant matches found in the UOP database.
+           </p>`;
 
     rw.innerHTML = `
       <div class="results-card">
@@ -306,7 +305,10 @@
           <div class="score-bar-label"><span>Overall match</span><span>${score}%</span></div>
           <div class="score-bar-bg"><div class="score-bar-fill fill-${level}" id="sbar" style="width:0%"></div></div>
         </div>
-        <div class="matches-list"><h3>Top matched sources</h3>${matchRows}</div>
+        <div class="matches-list">
+            <h3>Matched sources</h3>
+            ${matchRows}
+        </div>
       </div>
     `;
 
