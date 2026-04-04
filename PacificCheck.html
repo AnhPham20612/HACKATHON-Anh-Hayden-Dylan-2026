@@ -67,23 +67,16 @@
       onclick="document.getElementById('file-input').click()">
       <div class="upload-icon">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 12V4M10 4L7 7M10 4L13 7"
-            stroke="var(--color-text-secondary)" stroke-width="1.5"
-            stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M4 13v2a1 1 0 001 1h10a1 1 0 001-1v-2"
-            stroke="var(--color-text-secondary)" stroke-width="1.5"
-            stroke-linecap="round"/>
+          <path d="M10 12V4M10 4L7 7M10 4L13 7" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 13v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
       </div>
       <h3>Drop your document here</h3>
       <p>or click to browse files</p>
       <p class="file-types">Supported: .pdf, .docx, .txt, .pages</p>
     </div>
-    <input type="file" id="file-input" style="display:none"
-      accept=".pdf,.docx,.txt" onchange="handleFile(this)" />
-
+    <input type="file" id="file-input" style="display:none" accept=".pdf,.docx,.txt" onchange="handleFile(this)" />
     <div id="file-name-display" class="file-name-display"></div>
-
     <div class="meta-row">
       <div class="field">
         <label>Course / Assignment</label>
@@ -100,30 +93,29 @@
       </div>
     </div>
     <p id="ref-active-indicator" style="display:none; font-size: 11px; color: var(--uop-navy); margin-bottom: 8px; font-weight: 500;">
-    ⓘ Custom reference file is active for this check.
+      ⓘ Custom reference file is active for this check.
     </p>
     <button class="check-btn" onclick="runCheck()">Check for plagiarism</button>
   </div>
 
-<div id="panel-reference" class="panel">
-  <div id="upload-status" style="display: none; text-align: center; color: #3B6D11; font-size: 13px; background: #EAF3DE; padding: 12px; border-radius: var(--radius-md); border: 0.5px solid rgba(59, 109, 17, 0.2); transition: opacity 0.5s ease; margin-top: 20px;">
-  </div>
-</div>
-
-  <div class="reference-upload-card" onclick="document.getElementById('ref-library-input').click()">
-    <div class="upload-icon" style="margin-bottom: 10px; background: var(--color-bg); border: 1.5px solid var(--color-border); width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+  <!-- Panel: Reference Library -->
+  <div id="panel-reference" class="panel">
+    <div class="info-banner">
+      <p><strong>Custom Baseline:</strong> Upload a reference document to compare your work against. References are kept private and processed only for your current session.</p>
+    </div>
+    <div class="reference-upload-card" onclick="document.getElementById('ref-library-input').click()">
+      <div class="upload-icon" style="margin: 0 auto 12px; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--color-bg); border: 1.5px solid var(--color-border);">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--uop-navy)" stroke-width="2">
-            <path d="M12 5v14M5 12h14"/>
+          <path d="M12 5v14M5 12h14"/>
         </svg>
+      </div>
+      <span style="display: block; text-align: center; font-weight: 500;">Upload Reference Document</span>
+      <p style="text-align: center; font-size: 12px; color: var(--color-text-tertiary); margin-top: 4px;">Supports .pdf, .docx, and .txt</p>
+      <input type="file" id="ref-library-input" style="display:none" onchange="confirmReferenceUpload(this)" />
     </div>
-    <span style="display: block; text-align: center;">Upload Reference Document</span>
-    <p style="text-align: center; font-size: 12px; color: var(--color-text-tertiary); margin-top: 4px;">Supports .pdf, .docx, and .txt</p>
-    <input type="file" id="ref-library-input" style="display:none" onchange="confirmReferenceUpload(this)" />
+    <div id="upload-status" style="display: none; text-align: center; color: #3B6D11; font-size: 13px; background: #EAF3DE; padding: 12px; border-radius: var(--radius-md); border: 0.5px solid rgba(59, 109, 17, 0.2); transition: opacity 0.5s ease; margin-top: 20px;">
+    </div>
   </div>
-
-  <div id="upload-status" style="display: none; text-align: center; color: #3B6D11; font-size: 13px; background: #EAF3DE; padding: 12px; border-radius: var(--radius-md); border: 0.5px solid rgba(59, 109, 17, 0.2); transition: opacity 0.5s ease; margin-top: 20px;">
-    </div>
-</div>
 
   <!-- Panel: My Submissions -->
   <div id="panel-history" class="panel">
@@ -135,21 +127,7 @@
         </div>
         <span class="score-chip score-low">4% match</span>
       </div>
-      <div class="history-item">
-        <div class="history-item-info">
-          <p class="history-item-title">BIOL 210 — Research Summary</p>
-          <p class="history-item-meta">Submitted Feb 3, 2025</p>
-        </div>
-        <span class="score-chip score-mid">22% match</span>
       </div>
-      <div class="history-item">
-        <div class="history-item-info">
-          <p class="history-item-title">COMP 151 — Term Paper</p>
-          <p class="history-item-meta">Submitted Nov 28, 2024</p>
-        </div>
-        <span class="score-chip score-low">8% match</span>
-      </div>
-    </div>
   </div>
 
   <!-- Loading bar -->
@@ -159,19 +137,12 @@
 
   <!-- Results area -->
   <div id="results-wrap">
-    <div class="empty-state">
+    <div class="empty-state" id="empty-state">
       <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-        <rect x="8" y="6" width="28" height="36" rx="3"
-          stroke="var(--color-text-secondary)" stroke-width="1.5"/>
-        <path d="M14 16h16M14 22h16M14 28h10"
-          stroke="var(--color-text-secondary)" stroke-width="1.5"
-          stroke-linecap="round"/>
-        <circle cx="38" cy="38" r="7"
-          fill="var(--color-bg-secondary)"
-          stroke="var(--color-text-secondary)" stroke-width="1.5"/>
-        <path d="M35 38h6M38 35v6"
-          stroke="var(--color-text-secondary)" stroke-width="1.5"
-          stroke-linecap="round"/>
+        <rect x="8" y="6" width="28" height="36" rx="3" stroke="var(--color-text-secondary)" stroke-width="1.5"/>
+        <path d="M14 16h16M14 22h16M14 28h10" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="38" cy="38" r="7" fill="var(--color-bg-secondary)" stroke="var(--color-text-secondary)" stroke-width="1.5"/>
+        <path d="M35 38h6M38 35v6" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
       <p>Your results will appear here after submission.</p>
     </div>
@@ -184,27 +155,34 @@
   function switchTab(name) {
     const names = ['text', 'upload', 'reference', 'history']; 
     
+    // Toggle tab button highlights
     document.querySelectorAll('.tab').forEach((t, i) => {
-      t.classList.toggle('active', names[i] === name);
+        t.classList.toggle('active', names[i] === name);
     });
     
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + name).classList.add('active');
+    // HIDE ALL panels and results by default
+    document.querySelectorAll('.panel').forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none'; 
+    });
+    
+    // Logic: Hide results wrap if we are just managing references or history
+    const resultsWrap = document.getElementById('results-wrap');
+    if (name === 'reference' || name === 'history') {
+        resultsWrap.style.display = 'none';
+    } else {
+        resultsWrap.style.display = 'block';
+    }
 
-    // Clear results when switching away from check tabs
-    if (name === 'history') {
-      document.getElementById('results-wrap').innerHTML =
-        '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 48 48" fill="none">' +
-        '<rect x="8" y="6" width="28" height="36" rx="3" stroke="var(--color-text-secondary)" stroke-width="1.5"/>' +
-        '<path d="M14 16h16M14 22h16M14 28h10" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round"/>' +
-        '<circle cx="38" cy="38" r="7" fill="var(--color-bg-secondary)" stroke="var(--color-text-secondary)" stroke-width="1.5"/>' +
-        '<path d="M35 38h6M38 35v6" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round"/>' +
-        '</svg><p>Your results will appear here after submission.</p></div>';
-      document.getElementById('loading-bar').classList.remove('active');
+    // SHOW ONLY the clicked panel
+    const activePanel = document.getElementById('panel-' + name);
+    if (activePanel) {
+        activePanel.classList.add('active');
+        activePanel.style.display = 'block';
     }
   }
 
-  /* ── File input handler ── */
+  /* ── File input handler (Main Upload) ── */
   function handleFile(input) {
     if (input.files[0]) {
       const display = document.getElementById('file-name-display');
@@ -229,31 +207,70 @@
   function runCheck() {
     const lb = document.getElementById('loading-bar');
     const rw = document.getElementById('results-wrap');
-
+    
+    // Hide the placeholder text/icon immediately
+    rw.innerHTML = ''; 
     lb.classList.add('active');
-    rw.innerHTML = '';
-
-    // TODO: Replace this setTimeout with a real fetch() call to your Python backend.
-    // Example:
-    //   const text = document.getElementById('text-input').value;
-    //   const course = document.getElementById('course-input').value;
-    //   const scope  = document.getElementById('compare-select').value;
-    //
-    //   fetch('/api/check', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ text, course, compare_scope: scope })
-    //   })
-    //   .then(r => r.json())
-    //   .then(data => renderResults(data.score, data.matches, data.flagged_passage))
-    //   .catch(err => showError(err))
-    //   .finally(() => lb.classList.remove('active'));
 
     setTimeout(() => {
-      lb.classList.remove('active');
-      const score = Math.floor(Math.random() * 35) + 3;
-      renderResults(score);
+        lb.classList.remove('active');
+        // Generate a random score for the demo
+        const score = Math.floor(Math.random() * 35) + 3;
+        renderResults(score);
     }, 2200);
+  }
+
+  /* ── Reference Upload Logic ── */
+  function confirmReferenceUpload(input) {
+    const statusBox = document.getElementById('upload-status');
+    if (input.files && input.files[0]) {
+      // 1. Show the green feedback box
+      statusBox.style.display = 'block';
+      statusBox.style.opacity = '1';
+      statusBox.innerHTML = `✓ <strong>${input.files[0].name}</strong> is now linked as a reference.`;
+      
+      // 2. Actually add it to the visible list below
+      addReferenceFile(input);
+
+      // 3. Fade out the green box after 5 seconds
+      setTimeout(() => {
+        statusBox.style.opacity = '0';
+        setTimeout(() => { statusBox.style.display = 'none'; }, 500);
+      }, 5000);
+    }
+  }
+
+  /* ── Logic to make uploaded files appear in the list ── */
+  function addReferenceFile(input) {
+    const fileList = document.getElementById('reference-file-list');
+    if (!fileList) return; // Guard clause if the list div doesn't exist yet
+    
+    const file = input.files[0];
+    const fileSize = (file.size / 1024).toFixed(1) + ' KB';
+    const uploadDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    const newItem = document.createElement('div');
+    newItem.className = 'history-item';
+    newItem.style.animation = 'fadeUp 0.3s ease both'; 
+    
+    newItem.innerHTML = `
+      <div class="history-item-info">
+        <p class="history-item-title">${file.name}</p>
+        <p class="history-item-meta">Added ${uploadDate} · ${fileSize}</p>
+      </div>
+      <button class="remove-btn" style="background:none; border:none; color:#A32D2D; cursor:pointer; font-size:12px;" onclick="removeReference(this)">Remove</button>
+    `;
+
+    fileList.appendChild(newItem);
+    input.value = ''; // Reset so the same file can be uploaded again
+  }
+
+  /* ── Function to remove the file from UI ── */
+  function removeReference(btn) {
+    const item = btn.parentElement;
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(10px)';
+    setTimeout(() => item.remove(), 200);
   }
 
   /* ── Render results ── */
@@ -262,26 +279,10 @@
     const level = score < 15 ? 'low' : score < 30 ? 'mid' : 'high';
     const label = score < 15 ? 'Low similarity' : score < 30 ? 'Moderate similarity' : 'High similarity';
 
-    // Mock matched sources — replace with real API data
     const matches = [
-      {
-        title: 'Smith, J. (2022) — ENGL 210 Final Paper',
-        meta: 'Submitted Nov 2022 · English Dept',
-        pct: Math.floor(score * 0.45),
-        dotLevel: level
-      },
-      {
-        title: 'Course Reader: UOP Writing Center, Spring 2023',
-        meta: 'Shared resource · All departments',
-        pct: Math.floor(score * 0.30),
-        dotLevel: 'low'
-      },
-      {
-        title: 'Garcia, T. (2023) — HIST 305 Term Paper',
-        meta: 'Submitted Apr 2023 · History Dept',
-        pct: Math.floor(score * 0.25),
-        dotLevel: 'low'
-      }
+      { title: 'Smith, J. (2022) — ENGL 210 Final Paper', meta: 'Submitted Nov 2022 · English Dept', pct: Math.floor(score * 0.45), dotLevel: level },
+      { title: 'Course Reader: UOP Writing Center, Spring 2023', meta: 'Shared resource · All departments', pct: Math.floor(score * 0.30), dotLevel: 'low' },
+      { title: 'Garcia, T. (2023) — HIST 305 Term Paper', meta: 'Submitted Apr 2023 · History Dept', pct: Math.floor(score * 0.25), dotLevel: 'low' }
     ];
 
     const matchRows = matches.map(m => `
@@ -301,37 +302,14 @@
           <h2>Similarity report</h2>
           <span class="score-chip score-${level}">${label}</span>
         </div>
-
         <div class="score-bar-wrap">
-          <div class="score-bar-label">
-            <span>Overall match</span>
-            <span>${score}%</span>
-          </div>
-          <div class="score-bar-bg">
-            <div class="score-bar-fill fill-${level}" id="sbar" style="width:0%"></div>
-          </div>
+          <div class="score-bar-label"><span>Overall match</span><span>${score}%</span></div>
+          <div class="score-bar-bg"><div class="score-bar-fill fill-${level}" id="sbar" style="width:0%"></div></div>
         </div>
-
-        <div class="matches-list">
-          <h3>Top matched sources</h3>
-          ${matchRows}
-        </div>
-
-        <div class="highlighted-text">
-          <h3>Flagged passage (example)</h3>
-          <p>
-            The concept of academic integrity forms the cornerstone of university
-            education. <mark>Students are expected to produce original work that
-            reflects their own understanding and analysis of the subject matter.</mark>
-            At UOP, this principle is upheld across all departments to ensure fair
-            assessment and <mark class="mid">scholarly credibility within the broader
-            academic community.</mark>
-          </p>
-        </div>
+        <div class="matches-list"><h3>Top matched sources</h3>${matchRows}</div>
       </div>
     `;
 
-    // Animate the bar after the DOM updates
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const bar = document.getElementById('sbar');
@@ -339,102 +317,6 @@
       });
     });
   }
-
-  /* ── Error display (for real API use) ── */
-  function showError(err) {
-    const rw = document.getElementById('results-wrap');
-    rw.innerHTML = `
-      <div class="empty-state">
-        <p style="color:#A32D2D;">Something went wrong. Please try again.</p>
-        <p style="font-size:12px; margin-top:6px; color:var(--color-text-tertiary);">${err}</p>
-      </div>
-    `;
-  }
-
-  /* ── Logic to make uploaded files appear in the list ── */
-function addReferenceFile(input) {
-  const fileList = document.getElementById('reference-file-list');
-  
-  if (input.files && input.files[0]) {
-    const file = input.files[0];
-    const fileSize = (file.size / 1024).toFixed(1) + ' KB';
-    const uploadDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-    // Create the new list item element
-    const newItem = document.createElement('div');
-    newItem.className = 'history-item';
-    newItem.style.animation = 'fadeUp 0.3s ease both'; // Reusing your login animation
-    
-    newItem.innerHTML = `
-      <div class="history-item-info">
-        <p class="history-item-title">${file.name}</p>
-        <p class="history-item-meta">Added ${uploadDate} · ${fileSize}</p>
-      </div>
-      <button class="remove-btn" onclick="removeReference(this)">Remove</button>
-    `;
-
-    // Append it to the list
-    fileList.appendChild(newItem);
-    
-    // Reset the input so the same file can be uploaded again if deleted
-    input.value = '';
-  }
-}
-
-/* ── Function to remove the file from UI ── */
-function removeReference(btn) {
-  const item = btn.parentElement;
-  item.style.opacity = '0';
-  item.style.transform = 'translateY(10px)';
-  setTimeout(() => item.remove(), 200);
-}
-
-/* ── Ensure the Tab Switcher recognizes the new panel ── */
-function switchTab(name) {
-  // Make sure 'reference' is in this array!
-  const names = ['text', 'upload', 'reference', 'history']; 
-  
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', names[i] === name);
-  });
-  
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  
-  const targetPanel = document.getElementById('panel-' + name);
-  if (targetPanel) {
-    targetPanel.classList.add('active');
-  }
-}
-
-/* ── Minimal Feedback for Reference Upload ── */
-function confirmReferenceUpload(input) {
-    /* ── Minimal Feedback for Reference Upload ── */
-    // 1. Target the elements correctly
-    const statusBox = document.getElementById('upload-status');
-    const mainTabIndicator = document.getElementById('ref-active-indicator');
-    
-    if (input.files && input.files[0]) {
-        // 2. Update the Green Status Box (Reference Tab)
-        statusBox.style.display = 'block';
-        statusBox.style.opacity = '1';
-        statusBox.innerHTML = `✓ <strong>${input.files[0].name}</strong> is now linked as a reference.`;
-        
-        // 3. Update the Blue Indicator (Main Upload Tab)
-        if (mainTabIndicator) {
-            mainTabIndicator.style.display = 'block';
-        }
-
-        console.log("Reference file staged for check:", input.files[0].name);
-
-        // 4. Fade out the green box after 5 seconds
-        setTimeout(() => {
-            statusBox.style.opacity = '0';
-            setTimeout(() => {
-                statusBox.style.display = 'none';
-            }, 500);
-        }, 5000);
-    }
-}
 </script>
 
 </body>
