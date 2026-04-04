@@ -140,8 +140,17 @@ body {
 }
 
 /* ── Panels ── */
-.panel { display: none; }
+.panel { 
+    display: none; 
+    animation: fadeIn 0.3s ease-out; /* Adds a soft entrance */
+}
+
 .panel.active { display: block; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 /* ── Upload zone ── */
 .upload-zone {
@@ -519,4 +528,68 @@ mark.mid {
     background: var(--color-bg-secondary);
     border-radius: var(--radius-md);
     border: 0.5px solid var(--color-border);
+}
+
+/* ── New Reference Library Section ── */
+
+.info-banner {
+    background: var(--color-bg-info);
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--uop-navy);
+}
+
+.info-banner p {
+    font-size: 13px;
+    color: var(--uop-navy);
+    line-height: 1.5;
+}
+
+.reference-upload-card {
+    border: 1.5px dashed var(--color-border-hover);
+    border-radius: var(--radius-lg);
+    padding: 3rem 1.5rem;
+    display: flex;
+    flex-direction: column; /* Stack icon and text */
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 2rem;
+    background: var(--color-bg-secondary);
+}
+
+.reference-upload-card:hover {
+    border-color: var(--uop-navy);
+    background: var(--color-bg-info);
+}
+
+.reference-upload-card span {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+/* Style for the "Remove" button in the list */
+.remove-btn {
+    font-size: 11px;
+    font-weight: 600;
+    color: #A32D2D;
+    background: #FCEBEB;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.remove-btn:hover {
+    background: #f9d7d7;
+    transform: translateY(-1px);
+}
+
+.remove-btn:active {
+    transform: translateY(0);
 }

@@ -31,6 +31,7 @@
   <div class="tabs">
     <button class="tab active" onclick="switchTab('text')">Paste text</button>
     <button class="tab" onclick="switchTab('upload')">Upload file</button>
+    <button class="tab" onclick="switchTab('reference')">Reference Library</button>
     <button class="tab" onclick="switchTab('history')">My submissions</button>
   </div>
 
@@ -98,8 +99,31 @@
         </select>
       </div>
     </div>
+    <p id="ref-active-indicator" style="display:none; font-size: 11px; color: var(--uop-navy); margin-bottom: 8px; font-weight: 500;">
+    ⓘ Custom reference file is active for this check.
+    </p>
     <button class="check-btn" onclick="runCheck()">Check for plagiarism</button>
   </div>
+
+<div id="panel-reference" class="panel">
+  <div id="upload-status" style="display: none; text-align: center; color: #3B6D11; font-size: 13px; background: #EAF3DE; padding: 12px; border-radius: var(--radius-md); border: 0.5px solid rgba(59, 109, 17, 0.2); transition: opacity 0.5s ease; margin-top: 20px;">
+  </div>
+</div>
+
+  <div class="reference-upload-card" onclick="document.getElementById('ref-library-input').click()">
+    <div class="upload-icon" style="margin-bottom: 10px; background: var(--color-bg); border: 1.5px solid var(--color-border); width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--uop-navy)" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+    </div>
+    <span style="display: block; text-align: center;">Upload Reference Document</span>
+    <p style="text-align: center; font-size: 12px; color: var(--color-text-tertiary); margin-top: 4px;">Supports .pdf, .docx, and .txt</p>
+    <input type="file" id="ref-library-input" style="display:none" onchange="confirmReferenceUpload(this)" />
+  </div>
+
+  <div id="upload-status" style="display: none; text-align: center; color: #3B6D11; font-size: 13px; background: #EAF3DE; padding: 12px; border-radius: var(--radius-md); border: 0.5px solid rgba(59, 109, 17, 0.2); transition: opacity 0.5s ease; margin-top: 20px;">
+    </div>
+</div>
 
   <!-- Panel: My Submissions -->
   <div id="panel-history" class="panel">
@@ -158,10 +182,12 @@
 <script>
   /* ── Tab switching ── */
   function switchTab(name) {
-    const names = ['text', 'upload', 'history'];
+    const names = ['text', 'upload', 'reference', 'history']; 
+    
     document.querySelectorAll('.tab').forEach((t, i) => {
       t.classList.toggle('active', names[i] === name);
     });
+    
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + name).classList.add('active');
 
@@ -324,6 +350,91 @@
       </div>
     `;
   }
+
+  /* ── Logic to make uploaded files appear in the list ── */
+function addReferenceFile(input) {
+  const fileList = document.getElementById('reference-file-list');
+  
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const fileSize = (file.size / 1024).toFixed(1) + ' KB';
+    const uploadDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    // Create the new list item element
+    const newItem = document.createElement('div');
+    newItem.className = 'history-item';
+    newItem.style.animation = 'fadeUp 0.3s ease both'; // Reusing your login animation
+    
+    newItem.innerHTML = `
+      <div class="history-item-info">
+        <p class="history-item-title">${file.name}</p>
+        <p class="history-item-meta">Added ${uploadDate} · ${fileSize}</p>
+      </div>
+      <button class="remove-btn" onclick="removeReference(this)">Remove</button>
+    `;
+
+    // Append it to the list
+    fileList.appendChild(newItem);
+    
+    // Reset the input so the same file can be uploaded again if deleted
+    input.value = '';
+  }
+}
+
+/* ── Function to remove the file from UI ── */
+function removeReference(btn) {
+  const item = btn.parentElement;
+  item.style.opacity = '0';
+  item.style.transform = 'translateY(10px)';
+  setTimeout(() => item.remove(), 200);
+}
+
+/* ── Ensure the Tab Switcher recognizes the new panel ── */
+function switchTab(name) {
+  // Make sure 'reference' is in this array!
+  const names = ['text', 'upload', 'reference', 'history']; 
+  
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', names[i] === name);
+  });
+  
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  
+  const targetPanel = document.getElementById('panel-' + name);
+  if (targetPanel) {
+    targetPanel.classList.add('active');
+  }
+}
+
+/* ── Minimal Feedback for Reference Upload ── */
+function confirmReferenceUpload(input) {
+    /* ── Minimal Feedback for Reference Upload ── */
+    // 1. Target the elements correctly
+    const statusBox = document.getElementById('upload-status');
+    const mainTabIndicator = document.getElementById('ref-active-indicator');
+    
+    if (input.files && input.files[0]) {
+        // 2. Update the Green Status Box (Reference Tab)
+        statusBox.style.display = 'block';
+        statusBox.style.opacity = '1';
+        statusBox.innerHTML = `✓ <strong>${input.files[0].name}</strong> is now linked as a reference.`;
+        
+        // 3. Update the Blue Indicator (Main Upload Tab)
+        if (mainTabIndicator) {
+            mainTabIndicator.style.display = 'block';
+        }
+
+        console.log("Reference file staged for check:", input.files[0].name);
+
+        // 4. Fade out the green box after 5 seconds
+        setTimeout(() => {
+            statusBox.style.opacity = '0';
+            setTimeout(() => {
+                statusBox.style.display = 'none';
+            }, 500);
+        }, 5000);
+    }
+}
 </script>
 
 </body>
