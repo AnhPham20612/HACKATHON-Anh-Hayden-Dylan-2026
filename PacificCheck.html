@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PacificCheck — UOP Academic Integrity Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="pacificcheck.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-badge">
+      <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 3L22 8V18L13 23L4 18V8L13 3Z" fill="none" stroke="#F2A900" stroke-width="1.5"/>
+        <path d="M13 7L18 10V16L13 19L8 16V10L13 7Z" fill="#F2A900" opacity="0.3"/>
+        <circle cx="13" cy="13" r="2.5" fill="#F2A900"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>PacificCheck</h1>
+      <p>Academic integrity tool — University of the Pacific</p>
+    </div>
+    <span class="uop-tag">UOP Internal</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('text')">Paste text</button>
+    <button class="tab" onclick="switchTab('upload')">Upload file</button>
+    <button class="tab" onclick="switchTab('history')">My submissions</button>
+  </div>
+
+  <!-- Panel: Paste Text -->
+  <div id="panel-text" class="panel active">
+    <div class="text-area-wrap">
+      <textarea id="text-input" placeholder="Paste your essay, paper, or any written work here..."></textarea>
+    </div>
+    <div class="meta-row">
+      <div class="field">
+        <label>Course / Assignment</label>
+        <input type="text" id="course-input" placeholder="e.g. ENGL 101 — Essay 2" />
+      </div>
+      <div class="field">
+        <label>Compare against</label>
+        <select id="compare-select">
+          <option value="all">All UOP student work</option>
+          <option value="dept">My department only</option>
+          <option value="class">This class only</option>
+          <option value="web">Include web sources</option>
+        </select>
+      </div>
+    </div>
+    <button class="check-btn" onclick="runCheck()">Check for plagiarism</button>
+  </div>
+
+  <!-- Panel: Upload File -->
+  <div id="panel-upload" class="panel">
+    <div class="upload-zone" id="dropzone"
+      ondragover="event.preventDefault(); this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="handleDrop(event)"
+      onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 12V4M10 4L7 7M10 4L13 7"
+            stroke="var(--color-text-secondary)" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 13v2a1 1 0 001 1h10a1 1 0 001-1v-2"
+            stroke="var(--color-text-secondary)" stroke-width="1.5"
+            stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Drop your document here</h3>
+      <p>or click to browse files</p>
+      <p class="file-types">Supported: .pdf, .docx, .txt, .pages</p>
+    </div>
+    <input type="file" id="file-input" style="display:none"
+      accept=".pdf,.docx,.txt" onchange="handleFile(this)" />
+
+    <div id="file-name-display" class="file-name-display"></div>
+
+    <div class="meta-row">
+      <div class="field">
+        <label>Course / Assignment</label>
+        <input type="text" placeholder="e.g. COMP 151 — Final Project" />
+      </div>
+      <div class="field">
+        <label>Compare against</label>
+        <select>
+          <option value="all">All UOP student work</option>
+          <option value="dept">My department only</option>
+          <option value="class">This class only</option>
+          <option value="web">Include web sources</option>
+        </select>
+      </div>
+    </div>
+    <button class="check-btn" onclick="runCheck()">Check for plagiarism</button>
+  </div>
+
+  <!-- Panel: My Submissions -->
+  <div id="panel-history" class="panel">
+    <div class="history-list">
+      <div class="history-item">
+        <div class="history-item-info">
+          <p class="history-item-title">ENGL 101 — Argumentative Essay</p>
+          <p class="history-item-meta">Submitted Mar 12, 2025</p>
+        </div>
+        <span class="score-chip score-low">4% match</span>
+      </div>
+      <div class="history-item">
+        <div class="history-item-info">
+          <p class="history-item-title">BIOL 210 — Research Summary</p>
+          <p class="history-item-meta">Submitted Feb 3, 2025</p>
+        </div>
+        <span class="score-chip score-mid">22% match</span>
+      </div>
+      <div class="history-item">
+        <div class="history-item-info">
+          <p class="history-item-title">COMP 151 — Term Paper</p>
+          <p class="history-item-meta">Submitted Nov 28, 2024</p>
+        </div>
+        <span class="score-chip score-low">8% match</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading bar -->
+  <div class="loading-bar" id="loading-bar">
+    <div class="loading-bar-fill"></div>
+  </div>
+
+  <!-- Results area -->
+  <div id="results-wrap">
+    <div class="empty-state">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <rect x="8" y="6" width="28" height="36" rx="3"
+          stroke="var(--color-text-secondary)" stroke-width="1.5"/>
+        <path d="M14 16h16M14 22h16M14 28h10"
+          stroke="var(--color-text-secondary)" stroke-width="1.5"
+          stroke-linecap="round"/>
+        <circle cx="38" cy="38" r="7"
+          fill="var(--color-bg-secondary)"
+          stroke="var(--color-text-secondary)" stroke-width="1.5"/>
+        <path d="M35 38h6M38 35v6"
+          stroke="var(--color-text-secondary)" stroke-width="1.5"
+          stroke-linecap="round"/>
+      </svg>
+      <p>Your results will appear here after submission.</p>
+    </div>
+  </div>
+
+</div><!-- /.app -->
+
+<script>
+  /* ── Tab switching ── */
+  function switchTab(name) {
+    const names = ['text', 'upload', 'history'];
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', names[i] === name);
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+
+    // Clear results when switching away from check tabs
+    if (name === 'history') {
+      document.getElementById('results-wrap').innerHTML =
+        '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 48 48" fill="none">' +
+        '<rect x="8" y="6" width="28" height="36" rx="3" stroke="var(--color-text-secondary)" stroke-width="1.5"/>' +
+        '<path d="M14 16h16M14 22h16M14 28h10" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round"/>' +
+        '<circle cx="38" cy="38" r="7" fill="var(--color-bg-secondary)" stroke="var(--color-text-secondary)" stroke-width="1.5"/>' +
+        '<path d="M35 38h6M38 35v6" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round"/>' +
+        '</svg><p>Your results will appear here after submission.</p></div>';
+      document.getElementById('loading-bar').classList.remove('active');
+    }
+  }
+
+  /* ── File input handler ── */
+  function handleFile(input) {
+    if (input.files[0]) {
+      const display = document.getElementById('file-name-display');
+      display.textContent = 'Selected: ' + input.files[0].name;
+      display.style.display = 'block';
+    }
+  }
+
+  /* ── Drag-and-drop handler ── */
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropzone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const display = document.getElementById('file-name-display');
+      display.textContent = 'Selected: ' + file.name;
+      display.style.display = 'block';
+    }
+  }
+
+  /* ── Plagiarism check (demo) ── */
+  function runCheck() {
+    const lb = document.getElementById('loading-bar');
+    const rw = document.getElementById('results-wrap');
+
+    lb.classList.add('active');
+    rw.innerHTML = '';
+
+    // TODO: Replace this setTimeout with a real fetch() call to your Python backend.
+    // Example:
+    //   const text = document.getElementById('text-input').value;
+    //   const course = document.getElementById('course-input').value;
+    //   const scope  = document.getElementById('compare-select').value;
+    //
+    //   fetch('/api/check', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ text, course, compare_scope: scope })
+    //   })
+    //   .then(r => r.json())
+    //   .then(data => renderResults(data.score, data.matches, data.flagged_passage))
+    //   .catch(err => showError(err))
+    //   .finally(() => lb.classList.remove('active'));
+
+    setTimeout(() => {
+      lb.classList.remove('active');
+      const score = Math.floor(Math.random() * 35) + 3;
+      renderResults(score);
+    }, 2200);
+  }
+
+  /* ── Render results ── */
+  function renderResults(score) {
+    const rw = document.getElementById('results-wrap');
+    const level = score < 15 ? 'low' : score < 30 ? 'mid' : 'high';
+    const label = score < 15 ? 'Low similarity' : score < 30 ? 'Moderate similarity' : 'High similarity';
+
+    // Mock matched sources — replace with real API data
+    const matches = [
+      {
+        title: 'Smith, J. (2022) — ENGL 210 Final Paper',
+        meta: 'Submitted Nov 2022 · English Dept',
+        pct: Math.floor(score * 0.45),
+        dotLevel: level
+      },
+      {
+        title: 'Course Reader: UOP Writing Center, Spring 2023',
+        meta: 'Shared resource · All departments',
+        pct: Math.floor(score * 0.30),
+        dotLevel: 'low'
+      },
+      {
+        title: 'Garcia, T. (2023) — HIST 305 Term Paper',
+        meta: 'Submitted Apr 2023 · History Dept',
+        pct: Math.floor(score * 0.25),
+        dotLevel: 'low'
+      }
+    ];
+
+    const matchRows = matches.map(m => `
+      <div class="match-item">
+        <div class="match-dot dot-${m.dotLevel}"></div>
+        <div class="match-info">
+          <p class="match-title">${m.title}</p>
+          <p class="match-meta">${m.meta}</p>
+        </div>
+        <span class="match-pct">${m.pct}%</span>
+      </div>
+    `).join('');
+
+    rw.innerHTML = `
+      <div class="results-card">
+        <div class="results-header">
+          <h2>Similarity report</h2>
+          <span class="score-chip score-${level}">${label}</span>
+        </div>
+
+        <div class="score-bar-wrap">
+          <div class="score-bar-label">
+            <span>Overall match</span>
+            <span>${score}%</span>
+          </div>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill fill-${level}" id="sbar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="matches-list">
+          <h3>Top matched sources</h3>
+          ${matchRows}
+        </div>
+
+        <div class="highlighted-text">
+          <h3>Flagged passage (example)</h3>
+          <p>
+            The concept of academic integrity forms the cornerstone of university
+            education. <mark>Students are expected to produce original work that
+            reflects their own understanding and analysis of the subject matter.</mark>
+            At UOP, this principle is upheld across all departments to ensure fair
+            assessment and <mark class="mid">scholarly credibility within the broader
+            academic community.</mark>
+          </p>
+        </div>
+      </div>
+    `;
+
+    // Animate the bar after the DOM updates
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const bar = document.getElementById('sbar');
+        if (bar) bar.style.width = score + '%';
+      });
+    });
+  }
+
+  /* ── Error display (for real API use) ── */
+  function showError(err) {
+    const rw = document.getElementById('results-wrap');
+    rw.innerHTML = `
+      <div class="empty-state">
+        <p style="color:#A32D2D;">Something went wrong. Please try again.</p>
+        <p style="font-size:12px; margin-top:6px; color:var(--color-text-tertiary);">${err}</p>
+      </div>
+    `;
+  }
+</script>
+
+</body>
+</html>
