@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PacificCheck — UOP Academic Integrity Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="PacificCheck.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-badge">
+      <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 3L22 8V18L13 23L4 18V8L13 3Z" fill="none" stroke="#F2A900" stroke-width="1.5"/>
+        <path d="M13 7L18 10V16L13 19L8 16V10L13 7Z" fill="#F2A900" opacity="0.3"/>
+        <circle cx="13" cy="13" r="2.5" fill="#F2A900"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>PacificCheck</h1>
+      <p>Academic integrity tool — University of the Pacific</p>
+    </div>
+    <span class="uop-tag">UOP Internal</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('text')">Paste text</button>
+    <button class="tab" onclick="switchTab('upload')">Upload file</button>
+    <button class="tab" onclick="switchTab('history')">My submissions</button>
+  </div>
+
+  <!-- Panel: Paste Text -->
+  <div id="panel-text" class="panel active">
+    <div class="text-area-wrap">
+      <textarea id="text-input" placeholder="Paste your essay, paper, or any written work here..."></textarea>
+    </div>
+    <div class="meta-row">
+      <div class="field">
+        <label>Assignment ID</label>
+        <input type="number" id="assignment-id-text" placeholder="e.g. 1" min="1" value="1"/>
+      </div>
+      <div class="field">
+        <label>Student ID</label>
+        <input type="number" id="student-id-text" placeholder="e.g. 1" min="1" value="1"/>
+      </div>
+    </div>
+    <button class="check-btn" onclick="runCheck('text')">Check for plagiarism</button>
+  </div>
+
+  <!-- Panel: Upload File -->
+  <div id="panel-upload" class="panel">
+    <div class="upload-zone" id="dropzone"
+      ondragover="event.preventDefault(); this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="handleDrop(event)"
+      onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 12V4M10 4L7 7M10 4L13 7"
+            stroke="var(--color-text-secondary)" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 13v2a1 1 0 001 1h10a1 1 0 001-1v-2"
+            stroke="var(--color-text-secondary)" stroke-width="1.5"
+            stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Drop your document here</h3>
+      <p>or click to browse files</p>
+      <p class="file-types">Supported: .pdf, .docx, .txt</p>
+    </div>
+    <input type="file" id="file-input" style="display:none"
+      accept=".pdf,.docx,.txt" onchange="handleFile(this)" />
+
+    <div id="file-name-display" class="file-name-display"></div>
+
+    <div class="meta-row">
+      <div class="field">
+        <label>Assignment ID</label>
+        <input type="number" id="assignment-id-upload" placeholder="e.g. 1" min="1" value="1"/>
+      </div>
+      <div class="field">
+        <label>Student ID</label>
+        <input type="number" id="student-id-upload" placeholder="e.g. 1" min="1" value="1"/>
+      </div>
+    </div>
+    <button class="check-btn" onclick="runCheck('upload')">Check for plagiarism</button>
+  </div>
+
+  <!-- Panel: My Submissions -->
+  <div id="panel-history" class="panel">
+    <div class="meta-row" style="margin-bottom:1rem;">
+      <div class="field">
+        <label>Assignment ID</label>
+        <input type="number" id="history-assignment-id" placeholder="e.g. 1" min="1" value="1"/>
+      </div>
+      <div class="field" style="display:flex;align-items:flex-end;">
+        <button class="check-btn" style="margin-bottom:0;" onclick="loadHistory()">Load submissions</button>
+      </div>
+    </div>
+    <div id="history-list" class="history-list">
+      <div class="empty-state" style="padding:2rem 0;">
+        <p>Enter an assignment ID and click "Load submissions" to view past checks.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading bar -->
+  <div class="loading-bar" id="loading-bar">
+    <div class="loading-bar-fill"></div>
+  </div>
+
+  <!-- Results area -->
+  <div id="results-wrap">
+    <div class="empty-state">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <rect x="8" y="6" width="28" height="36" rx="3"
+          stroke="var(--color-text-secondary)" stroke-width="1.5"/>
+        <path d="M14 16h16M14 22h16M14 28h10"
+          stroke="var(--color-text-secondary)" stroke-width="1.5"
+          stroke-linecap="round"/>
+        <circle cx="38" cy="38" r="7"
+          fill="var(--color-bg-secondary)"
+          stroke="var(--color-text-secondary)" stroke-width="1.5"/>
+        <path d="M35 38h6M38 35v6"
+          stroke="var(--color-text-secondary)" stroke-width="1.5"
+          stroke-linecap="round"/>
+      </svg>
+      <p>Your results will appear here after submission.</p>
+    </div>
+  </div>
+
+</div><!-- /.app -->
+
+<script>
+  /* ── Stored dropped file ── */
+  let droppedFile = null;
+
+  /* ── Tab switching ── */
+  function switchTab(name) {
+    const names = ['text', 'upload', 'history'];
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', names[i] === name);
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+
+    if (name === 'history') {
+      resetResults();
+      document.getElementById('loading-bar').classList.remove('active');
+    }
+  }
+
+  /* ── Reset results panel ── */
+  function resetResults() {
+    document.getElementById('results-wrap').innerHTML = `
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <rect x="8" y="6" width="28" height="36" rx="3" stroke="var(--color-text-secondary)" stroke-width="1.5"/>
+          <path d="M14 16h16M14 22h16M14 28h10" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="38" cy="38" r="7" fill="var(--color-bg-secondary)" stroke="var(--color-text-secondary)" stroke-width="1.5"/>
+          <path d="M35 38h6M38 35v6" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <p>Your results will appear here after submission.</p>
+      </div>`;
+  }
+
+  /* ── File input handler ── */
+  function handleFile(input) {
+    if (input.files[0]) {
+      droppedFile = input.files[0];
+      const display = document.getElementById('file-name-display');
+      display.textContent = 'Selected: ' + droppedFile.name;
+      display.style.display = 'block';
+    }
+  }
+
+  /* ── Drag-and-drop handler ── */
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropzone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      droppedFile = file;
+      const display = document.getElementById('file-name-display');
+      display.textContent = 'Selected: ' + file.name;
+      display.style.display = 'block';
+    }
+  }
+
+  /* ── Run plagiarism check ── */
+  function runCheck(tab) {
+    const lb = document.getElementById('loading-bar');
+    const rw = document.getElementById('results-wrap');
+
+    const assignmentId = parseInt(
+      tab === 'upload'
+        ? document.getElementById('assignment-id-upload').value
+        : document.getElementById('assignment-id-text').value
+    );
+    const studentId = parseInt(
+      tab === 'upload'
+        ? document.getElementById('student-id-upload').value
+        : document.getElementById('student-id-text').value
+    );
+
+    if (!assignmentId || !studentId) {
+      showError('Please enter a valid Assignment ID and Student ID.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('assignment_id', assignmentId);
+    formData.append('student_id', studentId);
+
+    const fileInput = document.getElementById('file-input');
+
+    if (tab === 'upload') {
+      // Use the dropped file if the input wasn't used
+      const file = (fileInput && fileInput.files[0]) || droppedFile;
+      if (!file) {
+        showError('Please select or drop a file first.');
+        return;
+      }
+      formData.append('file', file);
+    } else {
+      const text = document.getElementById('text-input').value.trim();
+      if (!text) {
+        showError('Please paste some text first.');
+        return;
+      }
+      const blob = new Blob([text], { type: 'text/plain' });
+      formData.append('file', blob, 'pasted_text.txt');
+    }
+
+    lb.classList.add('active');
+    rw.innerHTML = '';
+
+    fetch('http://127.0.0.1:8000/submit', {
+      method: 'POST',
+      body: formData
+    })
+    .then(r => {
+      if (!r.ok) return r.json().then(e => { throw new Error(e.detail || 'Server error'); });
+      return r.json();
+    })
+    .then(data => renderResults(data.overall_score, data.results, data.overall_risk))
+    .catch(err => showError(err.message || String(err)))
+    .finally(() => lb.classList.remove('active'));
+  }
+
+  /* ── Load submission history ── */
+  function loadHistory() {
+    const assignmentId = parseInt(document.getElementById('history-assignment-id').value);
+    if (!assignmentId) {
+      document.getElementById('history-list').innerHTML =
+        '<p style="font-size:13px;color:var(--color-text-secondary);">Please enter a valid assignment ID.</p>';
+      return;
+    }
+
+    document.getElementById('history-list').innerHTML =
+      '<p style="font-size:13px;color:var(--color-text-secondary);">Loading...</p>';
+
+    fetch(`http://127.0.0.1:8000/submissions/${assignmentId}`)
+      .then(r => {
+        if (!r.ok) throw new Error('Could not load submissions.');
+        return r.json();
+      })
+      .then(subs => {
+        if (!subs.length) {
+          document.getElementById('history-list').innerHTML =
+            '<p style="font-size:13px;color:var(--color-text-secondary);">No submissions found for this assignment.</p>';
+          return;
+        }
+
+        document.getElementById('history-list').innerHTML = subs.map(s => `
+          <div class="history-item" onclick="loadReport(${s.submission_id})" style="cursor:pointer;">
+            <div class="history-item-info">
+              <p class="history-item-title">${s.student} — ${s.file_name || 'pasted text'}</p>
+              <p class="history-item-meta">Submitted ${new Date(s.submitted_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })}</p>
+            </div>
+            <span style="font-size:12px;color:var(--color-text-tertiary);">View report →</span>
+          </div>`).join('');
+      })
+      .catch(err => {
+        document.getElementById('history-list').innerHTML =
+          `<p style="font-size:13px;color:#A32D2D;">${err.message}</p>`;
+      });
+  }
+
+  /* ── Load a past report by submission ID ── */
+  function loadReport(submissionId) {
+    const lb = document.getElementById('loading-bar');
+    lb.classList.add('active');
+
+    fetch(`http://127.0.0.1:8000/report/${submissionId}`)
+      .then(r => {
+        if (!r.ok) throw new Error('Could not load report.');
+        return r.json();
+      })
+      .then(data => {
+        const check  = data.check_info;
+        const matches = (data.matches || []).map(m => ({
+          matched_student:  `${m.first_name} ${m.last_name}`,
+          matched_file:     m.file_name || 'pasted text',
+          similarity_score: parseFloat(m.similarity_score),
+          reasoning:        m.match_location || '',
+          preview:          m.matched_text_snippet || ''
+        }));
+
+        const score = parseFloat(check.overall_similarity_score) || 0;
+        const risk  = score >= 70 ? 'HIGH' : score >= 20 ? 'MEDIUM' : 'CLEAN';
+        renderResults(score, matches, risk);
+
+        // Scroll results into view
+        document.getElementById('results-wrap').scrollIntoView({ behavior: 'smooth' });
+      })
+      .catch(err => showError(err.message))
+      .finally(() => lb.classList.remove('active'));
+  }
+
+  /* ── Render results ── */
+  function renderResults(score, matches, risk) {
+    const rw = document.getElementById('results-wrap');
+
+    const levelMap = {
+      HIGH:   { cls: 'high', label: 'High similarity' },
+      MEDIUM: { cls: 'mid',  label: 'Moderate similarity' },
+      CLEAN:  { cls: 'low',  label: 'Low similarity' }
+    };
+    const { cls, label } = levelMap[risk] || levelMap['CLEAN'];
+
+    const noMatches = !matches || matches.length === 0;
+
+    const matchRows = noMatches ? '' : matches.map(m => {
+      const dotCls = m.similarity_score >= 70 ? 'dot-high'
+                   : m.similarity_score >= 20 ? 'dot-mid'
+                   : 'dot-low';
+      return `
+        <div class="match-item">
+          <div class="match-dot ${dotCls}"></div>
+          <div class="match-info">
+            <p class="match-title">${m.matched_student} — ${m.matched_file}</p>
+            <p class="match-meta">${m.reasoning || 'Similarity detected by Gemini analysis'}</p>
+          </div>
+          <span class="match-pct">${m.similarity_score.toFixed(1)}%</span>
+        </div>`;
+    }).join('');
+
+    const flaggedPassage = (!noMatches && matches[0].preview)
+      ? `<mark>${matches[0].preview}</mark>`
+      : '<span style="color:var(--color-text-tertiary)">No flagged passages — submission appears original.</span>';
+
+    rw.innerHTML = `
+      <div class="results-card">
+        <div class="results-header">
+          <h2>Similarity report</h2>
+          <span class="score-chip score-${cls}">${label}</span>
+        </div>
+
+        <div class="score-bar-wrap">
+          <div class="score-bar-label">
+            <span>Overall match</span>
+            <span>${score.toFixed(1)}%</span>
+          </div>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill fill-${cls}" id="sbar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="matches-list">
+          <h3>${noMatches ? 'No matches found' : 'Top matched sources'}</h3>
+          ${noMatches
+            ? '<p style="font-size:13px;color:var(--color-text-secondary);">No submissions exceeded the similarity threshold.</p>'
+            : matchRows}
+        </div>
+
+        <div class="highlighted-text">
+          <h3>Flagged passage</h3>
+          <p>${flaggedPassage}</p>
+        </div>
+      </div>`;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const bar = document.getElementById('sbar');
+        if (bar) bar.style.width = score + '%';
+      });
+    });
+  }
+
+  /* ── Error display ── */
+  function showError(msg) {
+    document.getElementById('results-wrap').innerHTML = `
+      <div class="empty-state">
+        <p style="color:#A32D2D;">Something went wrong. Please try again.</p>
+        <p style="font-size:12px;margin-top:6px;color:var(--color-text-tertiary);">${msg}</p>
+      </div>`;
+  }
+</script>
+
+</body>
+</html>
