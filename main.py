@@ -80,6 +80,7 @@ Rules:
 - similarity_score 70-100 = high similarity, likely plagiarism
 - Consider direct copying, paraphrasing, and reordered sentences all as plagiarism
 - Do not include any text outside the JSON object
+- Do not be polar in your similarity scores, provide numbers that are between 0 and 100 to have some more insight in accuracy
 
 --- SUBMISSION A (new) ---
 {new_text[:4000]}
