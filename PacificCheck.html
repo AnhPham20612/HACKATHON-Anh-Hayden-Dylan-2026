@@ -5,7 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PacificCheck — UOP Academic Integrity Tool</title>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="PacificCheck/PacificCheck.css" />
+  <link rel="stylesheet" href="PacificCheck.css" />
+  <style>
+    /* ── Logout button ── */
+    .logout-btn {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-pill {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      background: var(--color-bg-secondary);
+      border: 0.5px solid var(--color-border);
+      border-radius: 20px;
+      padding: 4px 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .logout-link {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-tertiary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      padding: 4px 6px;
+      border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+
+    .logout-link:hover {
+      color: #A32D2D;
+      background: #FCEBEB;
+    }
+  </style>
 </head>
 <body>
 
@@ -25,6 +66,12 @@
       <p>Academic integrity tool — University of the Pacific</p>
     </div>
     <span class="uop-tag">UOP Internal</span>
+
+    <!-- User info + logout -->
+    <div class="logout-btn">
+      <span class="user-pill" id="user-display"></span>
+      <button class="logout-link" onclick="logout()">Log out</button>
+    </div>
   </div>
 
   <!-- Tabs -->
@@ -127,7 +174,7 @@
         </div>
         <span class="score-chip score-low">4% match</span>
       </div>
-      </div>
+    </div>
   </div>
 
   <!-- Loading bar -->
@@ -151,38 +198,57 @@
 </div><!-- /.app -->
 
 <script>
+  // ── Auth guard — redirect to login if no session ──
+  (function() {
+    const auth = sessionStorage.getItem('pacificcheck_auth');
+    if (!auth) {
+      // Go up one folder level to Login.html (since this file is in PacificCheck/)
+      window.location.replace('../Login.html');
+    }
+  })();
+
+  // ── Display logged-in user's email ──
+  (function() {
+    const email = sessionStorage.getItem('pacificcheck_user') || '';
+    const display = document.getElementById('user-display');
+    if (display && email) display.textContent = email;
+  })();
+
+  // ── Logout ──
+  function logout() {
+    sessionStorage.removeItem('pacificcheck_auth');
+    sessionStorage.removeItem('pacificcheck_user');
+    window.location.replace('../Login.html');
+  }
+
   /* ── Tab switching ── */
   function switchTab(name) {
-    const names = ['text', 'upload', 'reference', 'history']; 
-    
-    // Toggle tab button highlights
+    const names = ['text', 'upload', 'reference', 'history'];
+
     document.querySelectorAll('.tab').forEach((t, i) => {
-        t.classList.toggle('active', names[i] === name);
+      t.classList.toggle('active', names[i] === name);
     });
-    
-    // HIDE ALL panels and results by default
+
     document.querySelectorAll('.panel').forEach(p => {
-        p.classList.remove('active');
-        p.style.display = 'none'; 
+      p.classList.remove('active');
+      p.style.display = 'none';
     });
-    
-    // Logic: Hide results wrap if we are just managing references or history
+
     const resultsWrap = document.getElementById('results-wrap');
     if (name === 'reference') {
-        resultsWrap.style.display = 'none'; // Hides the bottom section entirely
+      resultsWrap.style.display = 'none';
     } else {
-        resultsWrap.style.display = 'block';
+      resultsWrap.style.display = 'block';
     }
 
-    // SHOW ONLY the clicked panel
     const activePanel = document.getElementById('panel-' + name);
     if (activePanel) {
-        activePanel.classList.add('active');
-        activePanel.style.display = 'block';
+      activePanel.classList.add('active');
+      activePanel.style.display = 'block';
     }
   }
 
-  /* ── File input handler (Main Upload) ── */
+  /* ── File input handler ── */
   function handleFile(input) {
     if (input.files[0]) {
       const display = document.getElementById('file-name-display');
@@ -207,16 +273,14 @@
   function runCheck() {
     const lb = document.getElementById('loading-bar');
     const rw = document.getElementById('results-wrap');
-    
-    // Hide the placeholder text/icon immediately
-    rw.innerHTML = ''; 
+
+    rw.innerHTML = '';
     lb.classList.add('active');
 
     setTimeout(() => {
-        lb.classList.remove('active');
-        // Generate a random score for the demo
-        const score = Math.floor(Math.random() * 35) + 3;
-        renderResults(score);
+      lb.classList.remove('active');
+      const score = Math.floor(Math.random() * 35) + 3;
+      renderResults(score);
     }, 2200);
   }
 
@@ -224,15 +288,12 @@
   function confirmReferenceUpload(input) {
     const statusBox = document.getElementById('upload-status');
     if (input.files && input.files[0]) {
-      // 1. Show the green feedback box
       statusBox.style.display = 'block';
       statusBox.style.opacity = '1';
       statusBox.innerHTML = `✓ <strong>${input.files[0].name}</strong> is now linked as a reference.`;
-      
-      // 2. Actually add it to the visible list below
+
       addReferenceFile(input);
 
-      // 3. Fade out the green box after 5 seconds
       setTimeout(() => {
         statusBox.style.opacity = '0';
         setTimeout(() => { statusBox.style.display = 'none'; }, 500);
@@ -240,32 +301,30 @@
     }
   }
 
-  /* ── Logic to make uploaded files appear in the list ── */
   function addReferenceFile(input) {
     const fileList = document.getElementById('reference-file-list');
-    if (!fileList) return; // Guard clause if the list div doesn't exist yet
-    
+    if (!fileList) return;
+
     const file = input.files[0];
     const fileSize = (file.size / 1024).toFixed(1) + ' KB';
     const uploadDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
     const newItem = document.createElement('div');
     newItem.className = 'history-item';
-    newItem.style.animation = 'fadeUp 0.3s ease both'; 
-    
+    newItem.style.animation = 'fadeUp 0.3s ease both';
+
     newItem.innerHTML = `
       <div class="history-item-info">
         <p class="history-item-title">${file.name}</p>
         <p class="history-item-meta">Added ${uploadDate} · ${fileSize}</p>
       </div>
-      <button class="remove-btn" style="background:none; border:none; color:#A32D2D; cursor:pointer; font-size:12px;" onclick="removeReference(this)">Remove</button>
+      <button class="remove-btn" onclick="removeReference(this)">Remove</button>
     `;
 
     fileList.appendChild(newItem);
-    input.value = ''; // Reset so the same file can be uploaded again
+    input.value = '';
   }
 
-  /* ── Function to remove the file from UI ── */
   function removeReference(btn) {
     const item = btn.parentElement;
     item.style.opacity = '0';
@@ -279,21 +338,9 @@
     const level = score < 15 ? 'low' : score < 30 ? 'mid' : 'high';
     const label = score < 15 ? 'Low similarity' : score < 30 ? 'Moderate similarity' : 'High similarity';
 
-    const matches = [];
-
-    const matchRows = matches.length > 0 
-        ? matches.map(m => `
-            <div class="match-item">
-                <div class="match-dot dot-${m.dotLevel}"></div>
-                <div class="match-info">
-                    <p class="match-title">${m.title}</p>
-                    <p class="match-meta">${m.meta}</p>
-                </div>
-                <span class="match-pct">${m.pct}%</span>
-            </div>`).join('')
-        : `<p style="text-align:center; padding: 20px; color: var(--color-text-tertiary); font-size: 14px;">
-            No significant matches found in the UOP database.
-           </p>`;
+    const matchRows = `<p style="text-align:center; padding: 20px; color: var(--color-text-tertiary); font-size: 14px;">
+        No significant matches found in the UOP database.
+       </p>`;
 
     rw.innerHTML = `
       <div class="results-card">

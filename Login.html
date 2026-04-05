@@ -5,14 +5,199 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PacificCheck — Log In</title>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  
-  <link rel="stylesheet" href="PacificCheck/PacificCheck.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-bg: #ffffff;
+      --color-bg-secondary: #f5f5f3;
+      --color-text-primary: #1a1a18;
+      --color-text-secondary: #6b6b67;
+      --color-text-tertiary: #9e9e9a;
+      --color-border: rgba(0,0,0,0.12);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --uop-navy: #003865;
+      --uop-gold: #F2A900;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg: #1a1a18;
+        --color-bg-secondary: #242422;
+        --color-text-primary: #f0ede8;
+        --color-text-secondary: #9e9e9a;
+        --color-text-tertiary: #6b6b67;
+        --color-border: rgba(255,255,255,0.1);
+      }
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--color-bg-secondary);
+      color: var(--color-text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--color-bg);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem 2rem 2rem;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .branding {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 2rem;
+    }
+
+    .logo-badge {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      background: var(--uop-navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-badge svg { width: 26px; height: 26px; }
+
+    .brand-text h1 {
+      font-family: 'Lora', serif;
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      color: var(--color-text-primary);
+      line-height: 1.2;
+    }
+
+    .brand-text p {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+    }
+
+    .divider {
+      height: 0.5px;
+      background: var(--color-border);
+      margin-bottom: 1.75rem;
+    }
+
+    .form-heading {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      margin-bottom: 1.25rem;
+    }
+
+    .field { margin-bottom: 1rem; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--color-text-primary);
+      background: var(--color-bg);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--uop-navy);
+      box-shadow: 0 0 0 3px rgba(0,56,101,0.08);
+    }
+
+    .email-hint {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      margin-top: 5px;
+    }
+
+    .error-msg {
+      font-size: 13px;
+      color: #A32D2D;
+      background: #FCEBEB;
+      border-radius: var(--radius-md);
+      padding: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s ease, padding 0.2s ease, margin 0.2s ease;
+      margin-bottom: 0;
+    }
+
+    .error-msg.visible {
+      padding: 9px 13px;
+      max-height: 60px;
+      margin-bottom: 14px;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 11px;
+      background: var(--uop-navy);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 4px;
+    }
+
+    .login-btn:hover  { background: #002d52; }
+    .login-btn:active { transform: scale(0.99); }
+
+    .login-btn.loading {
+      background: #4a7da8;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+      margin-top: 1.25rem;
+      line-height: 1.6;
+    }
+  </style>
 </head>
 <body>
 
 <div class="login-card">
 
-  <!-- Branding -->
   <div class="branding">
     <div class="logo-badge">
       <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -31,7 +216,6 @@
 
   <p class="form-heading">Log in to your account</p>
 
-  <!-- Email field -->
   <div class="field">
     <label for="email">UOP email</label>
     <input
@@ -45,7 +229,6 @@
     <p class="email-hint">Must end with @u.pacific.edu</p>
   </div>
 
-  <!-- Password field -->
   <div class="field">
     <label for="password">Password</label>
     <input
@@ -59,15 +242,12 @@
     />
   </div>
 
-  <!-- Error message -->
   <div class="error-msg" id="error-msg"></div>
 
-  <!-- Login button -->
   <button class="login-btn" id="login-btn" onclick="handleLogin()">
     Log in
   </button>
 
-  <!-- Footer -->
   <p class="footer-note">
     Access is restricted to students and staff with a valid<br/>
     <strong>@u.pacific.edu</strong> email address.
@@ -76,6 +256,10 @@
 </div>
 
 <script>
+  if (sessionStorage.getItem('pacificcheck_auth')) {
+    window.location.href = 'PacificCheck/PacificCheck.html';
+  }
+
   function clearError() {
     const err = document.getElementById('error-msg');
     err.textContent = '';
@@ -95,52 +279,34 @@
 
     clearError();
 
-    // Basic front-end validation
-    if (!email) {
-      return showError('Please enter your UOP email address.');
-    }
+    if (!email) return showError('Please enter your UOP email address.');
+    if (!email.toLowerCase().endsWith('@u.pacific.edu')) return showError('Only @u.pacific.edu email addresses are allowed.');
+    if (!password) return showError('Please enter your password.');
 
-    if (!email.toLowerCase().endsWith('@u.pacific.edu')) {
-      return showError('Only @u.pacific.edu email addresses are allowed.');
-    }
-
-    if (!password) {
-      return showError('Please enter your password.');
-    }
-
-    // Show loading state while waiting for backend
-    btn.textContent = 'Logging in...';
+    btn.textContent = 'Logging in…';
     btn.classList.add('loading');
 
-    // TODO: replace this block with your team's real API call, for example:
-    //
-    // fetch('/api/login', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ email, password })
-    // })
+    // ── Replace with your real API call when backend is ready ──
+    // fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ email, password }) })
     // .then(r => r.json())
     // .then(data => {
     //   if (data.success) {
-    //     window.location.href = 'pacificcheck.html'; // redirect to main app
+    //     sessionStorage.setItem('pacificcheck_auth', data.token);
+    //     sessionStorage.setItem('pacificcheck_user', email);
+    //     window.location.href = 'PacificCheck/PacificCheck.html';
     //   } else {
     //     showError(data.message || 'Invalid email or password.');
-    //     btn.textContent = 'Log in';
-    //     btn.classList.remove('loading');
+    //     btn.textContent = 'Log in'; btn.classList.remove('loading');
     //   }
     // })
-    // .catch(() => {
-    //   showError('Something went wrong. Please try again.');
-    //   btn.textContent = 'Log in';
-    //   btn.classList.remove('loading');
-    // });
+    // .catch(() => { showError('Something went wrong. Please try again.');
+    //   btn.textContent = 'Log in'; btn.classList.remove('loading'); });
 
-    // Temporary simulation — remove once backend is ready
     setTimeout(() => {
-      btn.textContent = 'Log in';
-      btn.classList.remove('loading');
-      // Simulates a successful login by redirecting to the main app page
-      window.location.href = 'pacificcheck.html';
+      sessionStorage.setItem('pacificcheck_auth', 'demo_session');
+      sessionStorage.setItem('pacificcheck_user', email);
+      window.location.href = 'PacificCheck/PacificCheck.html';
     }, 1200);
   }
 </script>
