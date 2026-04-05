@@ -362,11 +362,102 @@ class DataBaseManager():
 
 
 
+    def get_or_create_student(self, uop_id: str, first_name: str,
+                              last_name: str, email: str,
+                              major: str = None, graduation_year: int = None) -> int:
+        """
+        Returns the student_id for an existing student, or creates and
+        returns a new one. Prevents duplicate-insert errors when the same
+        student submits more than once.
+        """
+        conn = get_db_connection()
+        cur = conn.cursor()
+        try:
+            cur.execute("SELECT student_id FROM students WHERE uop_id = %s;", (uop_id,))
+            row = cur.fetchone()
+            if row:
+                return row[0]
+            cur.execute("""
+                INSERT INTO students (uop_id, first_name, last_name, email, major, graduation_year)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                RETURNING student_id;
+            """, (uop_id, first_name, last_name, email, major, graduation_year))
+            student_id = cur.fetchone()[0]
+            conn.commit()
+            return student_id
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            cur.close()
+            conn.close()
+
+    def get_or_create_assignment(self, course_id: int, assignment_name: str,
+                                  semester: str = None, year: int = None) -> int:
+        """
+        Returns the assignment_id for an existing assignment in a course,
+        or creates and returns a new one.
+        """
+        conn = get_db_connection()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                SELECT assignment_id FROM assignments
+                WHERE course_id = %s AND assignment_name = %s;
+            """, (course_id, assignment_name))
+            row = cur.fetchone()
+            if row:
+                return row[0]
+            cur.execute("""
+                INSERT INTO assignments (course_id, assignment_name, semester, year)
+                VALUES (%s, %s, %s, %s)
+                RETURNING assignment_id;
+            """, (course_id, assignment_name, semester, year))
+            assignment_id = cur.fetchone()[0]
+            conn.commit()
+            return assignment_id
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            cur.close()
+            conn.close()
+
+    def get_or_create_course(self, course_code: str, course_name: str,
+                              department: str = None) -> int:
+        """
+        Returns the course_id for an existing course, or creates and
+        returns a new one.
+        """
+        conn = get_db_connection()
+        cur = conn.cursor()
+        try:
+            cur.execute("SELECT course_id FROM courses WHERE course_code = %s;", (course_code,))
+            row = cur.fetchone()
+            if row:
+                return row[0]
+            cur.execute("""
+                INSERT INTO courses (course_code, course_name, department)
+                VALUES (%s, %s, %s)
+                RETURNING course_id;
+            """, (course_code, course_name, department))
+            course_id = cur.fetchone()[0]
+            conn.commit()
+            return course_id
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            cur.close()
+            conn.close()
+
     def seed_demo_data(self):
         """
         Ensures student_id=1 and assignment_id=1 exist so the frontend
         demo works out of the box without manually inserting rows first.
         Safe to call repeatedly — uses INSERT ... ON CONFLICT DO NOTHING.
+        After inserting, resets SERIAL sequences so new rows get IDs > 1
+        and don't collide with the seed data.
         """
         conn = get_db_connection()
         cur = conn.cursor()
@@ -389,15 +480,23 @@ class DataBaseManager():
                 VALUES (1, 'DEMO001', 'Demo', 'Student', 'demo@u.pacific.edu')
                 ON CONFLICT DO NOTHING;
             """)
+
+            # CRITICAL: reset sequences so the next auto-generated ID starts
+            # above 1. Without this, any INSERT that relies on SERIAL will try
+            # to use ID 1 again and crash with a duplicate key error — which is
+            # why student_id and assignment_id were stuck at 1.
+            cur.execute("SELECT setval('students_student_id_seq', MAX(student_id)) FROM students;")
+            cur.execute("SELECT setval('courses_course_id_seq', MAX(course_id)) FROM courses;")
+            cur.execute("SELECT setval('assignments_assignment_id_seq', MAX(assignment_id)) FROM assignments;")
+
             conn.commit()
-            print('Demo seed data ready.')
+            print('Demo seed data ready. Sequences reset.')
         except Exception as e:
             conn.rollback()
             print(f'Seed warning (non-fatal): {e}')
         finally:
             cur.close()
             conn.close()
-
 
 def test_connection():
     """Test database connection"""
@@ -426,7 +525,3 @@ if __name__ == "__main__":
         print("\nExample: Creating a database manager instance...")
         db = DataBaseManager()
         print("Ready to use!")
-
-
-
-
