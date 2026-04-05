@@ -20,3 +20,6 @@ Rules:
 - Do not be polar in your similarity scores, provide numbers that are between 0 and 100 to have some more insight in accuracy
 
 Then, once you submit a file in our database, your file is saved to be cross-referenced with future assignment submissions.
+
+TO ENSURE FULL FUNCTIONALITY, ENTER THE FOLLOWING CODE INTO THE TERMINAL OF THE PYTHON ENVIRONMENT FOR API FUNCTION: 
+uvicorn main:app --reload
