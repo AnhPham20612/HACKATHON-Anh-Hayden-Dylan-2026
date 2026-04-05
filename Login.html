@@ -257,7 +257,7 @@
 
 <script>
   if (sessionStorage.getItem('pacificcheck_auth')) {
-    window.location.href = 'PacificCheck/PacificCheck.html';
+    window.location.href = 'PacificCheck.html';
   }
 
   function clearError() {
@@ -306,7 +306,7 @@
     setTimeout(() => {
       sessionStorage.setItem('pacificcheck_auth', 'demo_session');
       sessionStorage.setItem('pacificcheck_user', email);
-      window.location.href = 'PacificCheck/PacificCheck.html';
+      window.location.href = 'PacificCheck.html';
     }, 1200);
   }
 </script>
